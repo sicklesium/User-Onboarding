@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { withFormik, Form, Field } from "formik";
 import * as Yup from "yup";
+import axios from 'axios';
 
 function SignupForm({ values, errors, touched, status }) {
 
@@ -83,16 +84,26 @@ const FormikSignup = withFormik({
       password: Yup.string().min(6, "Your password must be at least 6 characdters long."),
 
       name: Yup.string().max(26, "Your name cannot be longer than 26 characters."),
-      password: Yup.string().min(12, "Your password cannot be longer than 12 characters.")
+      password: Yup.string().max(12, "Your password cannot be longer than 12 characters.")
 
 
       // passing a string in required makes a custom inline error msg
     }),
 
-  handleSubmit(values) {
-    console.log(values);
-    //THIS IS WHERE YOU DO YOUR FORM SUBMISSION CODE... HTTP REQUESTS, ETC.
-  }
+    handleSubmit(values, { setStatus, resetForm }) {
+      console.log("submitting", values);
+      axios
+        .post("https://reqres.in/api/users/", values)
+        .then(res => {
+          console.log("success", res);
+          // sends a status update through props in AnimalForm with value as res.data content
+          setStatus(res.data);
+
+          //clears form inputs, from FormikBag
+          resetForm();
+        })
+        .catch(err => console.log(err.response));
+    }
 })(SignupForm);
 
 export default FormikSignup;
